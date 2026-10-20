@@ -1,0 +1,11 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import {BrowserRouter, Routes, Route, Link} from 'react-router-dom';
+import AdminLayout from './layouts/AdminLayout';
+import Dashboard from './pages/Dashboard';
+import Products from './pages/Products';
+import AddProduct from './pages/AddProduct';
+import Inventory from './pages/Inventory';
+import Placeholder from './pages/Placeholder';
+import './styles.css';
+ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter><Routes><Route element={<AdminLayout/>}><Route index element={<Dashboard/>}/><Route path="products" element={<Products/>}/><Route path="products/new" element={<AddProduct/>}/><Route path="inventory" element={<Inventory/>}/><Route path="orders" element={<Placeholder title="Orders" description="Your order operations, in one place."/>}/><Route path="returns" element={<Placeholder title="Returns" description="A dedicated home for return operations."/>}/><Route path="ondc-settings" element={<Placeholder title="ONDC Settings" description="Future network configuration for your seller node."/>}/><Route path="*" element={<section className="panel"><h1>Page not found</h1><Link to="/">Back to dashboard</Link></section>}/></Route></Routes></BrowserRouter></React.StrictMode>);

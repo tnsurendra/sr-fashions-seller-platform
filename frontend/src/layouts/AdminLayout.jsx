@@ -1,0 +1,5 @@
+import {NavLink, Outlet} from 'react-router-dom';
+const links = [['/', 'Dashboard', '01'], ['/products', 'Products', '02'], ['/inventory', 'Inventory', '03'], ['/orders', 'Orders', '04'], ['/returns', 'Returns', '05'], ['/ondc-settings', 'ONDC Settings', '06']];
+export default function AdminLayout() {
+  return <div className="app-shell"><aside className="sidebar"><a className="brand" href="/">SR<span>Fashions</span></a><div className="nav-caption">YOUR BUSINESS</div><nav>{links.map(([path, label, number]) => <NavLink end={path === '/'} key={path} to={path}><span className="nav-number">{number}</span>{label}</NavLink>)}</nav><div className="sidebar-footer"><span className="dot"/>Local development<br/><small>Fashion retail / Admin</small></div></aside><div className="main-shell"><div className="topbar"><span>Workspace / <strong>SR Fashions</strong></span><span className="environment">DEVELOPMENT</span></div><main><Outlet/></main><footer>SR Fashions <span>Foundation v0.1 / Local administration</span></footer></div></div>;
+}

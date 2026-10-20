@@ -1,0 +1,32 @@
+{
+  "downloaded_date": "2026-10-07",
+  "review_completed_date": "2026-10-08",
+  "note": "Original foundation snapshots and provenance are preserved. These additional snapshots pin the reviewed bytes; mutable main URLs are not immutable revisions.",
+  "sources": [
+    {
+      "file": "signing-reference.py.txt",
+      "url": "https://raw.githubusercontent.com/ONDC-Official/reference-implementations/main/utilities/signing_and_verification/python/cryptic_utils.py",
+      "sha256": "af89731cf414ed5aa8140d1684caba32e1f9eb0c043af672d1b78e8f8132e0e8"
+    },
+    {
+      "file": "signing-verification.md",
+      "url": "https://raw.githubusercontent.com/ONDC-Official/developer-docs/main/registry/signing-verification.md",
+      "sha256": "0406e5f07b430bc6eeaece2a3ce9e9d82223cfd045146588010f14ffa7b1e055"
+    },
+    {
+      "file": "registry-onboarding-reference.md",
+      "url": "https://raw.githubusercontent.com/ONDC-Official/developer-docs/main/registry/Onboarding%20of%20Participants.md",
+      "sha256": "2a8779210cd4b643f5f1bf8e5073eaad5c4fed54acbac1aaff7417e22baed87e"
+    },
+    {
+      "file": "registry-2.1.0.json",
+      "url": "https://api.swaggerhub.com/apis/ONDC/ONDC-Registry-Onboarding/2.1.0",
+      "sha256": "e140c808f2d1b775ca3594b48fc0969453937f5a6951f0320406cfa17495b81c"
+    },
+    {
+      "file": "onix-model-v1.5.0.go.txt",
+      "url": "https://raw.githubusercontent.com/ONDC-Official/automation-beckn-onix/v1.5.0/pkg/model/model.go",
+      "sha256": "f35f55722efa5de4ef543330a6dd20ba5fea0f0394ac5f9abdede21808b78157"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+import {PageHeader} from '../components/Common';
+export default function Placeholder({title, description}) {return <><PageHeader title={title}>{description}</PageHeader><section className="panel empty"><span className="badge">PLANNED</span><h2>{title} - Coming Soon</h2><p>This module is reserved for a future development phase.</p>{title==='ONDC Settings' && <p>ONDC:RET12 integration is not configured.<br/>Registry onboarding, protocol APIs and signing are not implemented.</p>}</section></>;}

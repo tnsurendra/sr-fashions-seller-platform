@@ -1,0 +1,13 @@
+{
+  "verified_on": "2026-10-07 America/New_York",
+  "version": "1.2.5",
+  "branch": "draft-b2c-1.2.5",
+  "commit": "7a9c7e6955018ae8f758c22f3f78f7af7d8def4e",
+  "build_url": "https://raw.githubusercontent.com/ONDC-Official/ONDC-RET-Specifications/7a9c7e6955018ae8f758c22f3f78f7af7d8def4e/api/build/build.yaml",
+  "build_sha256": "57e203f75a50a5c75490f506ca24d57d696466122e64a5a5a8e9bc2a0f490076",
+  "contract_url": "https://docs.google.com/document/d/1E2OyVXh34YNEVOnS4rO3nPVoqTO3RsG2uh-BqnSrqgY",
+  "contract_sha256": "300079f3d3adaea78e7ef3dc4ba2cbdb7b5cb9608f145dd41c37e1c6938d3328",
+  "taxonomy_url": "https://docs.google.com/spreadsheets/d/1APAvavF_BNbTA89benAlGtv0GuFvpn2b6XXi4lSdTTw/edit#gid=623321892",
+  "taxonomy_xlsx_sha256": "e09dd058dd153c9ae9ecee0bcf5416b93e95d5766bf9884949f8c3ef00675680",
+  "normalization": "Extracted official fashion sample; removed Google Docs numeric footnote markers only. No field or version changes."
+}

@@ -1,0 +1,26 @@
+.env
+.env.*
+!.env.example
+.venv*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+node_modules/
+dist/
+*.log
+*.db
+.DS_Store
+
+# Development signing material
+.ondc-keys/
+*.private.key
+
+# Local business-data backups
+backups/
+*.pem
+*.p12
+*.pfx
+
+*.code-workspace

@@ -1,0 +1,114 @@
+{
+  "info": {
+    "name": "SR Fashions - Local API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Internal admin REST API only. Write requests modify catalog data when explicitly sent."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/health"
+      }
+    },
+    {
+      "name": "List products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/products?seller_id=2&limit=100"
+      }
+    },
+    {
+      "name": "Get cotton shirt",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/products/3"
+      }
+    },
+    {
+      "name": "Create test polo (unique timestamp SKU)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/products",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"seller_id\": 2,\n  \"name\": \"Postman Test Polo\",\n  \"brand\": \"SR Essentials\",\n  \"description\": \"Created through Postman for testing.\",\n  \"category\": \"Polo Shirts\",\n  \"variants\": [\n    {\n      \"sku\": \"POSTMAN-POLO-NAVY-M-{{$timestamp}}\",\n      \"size\": \"M\",\n      \"color\": \"Navy\",\n      \"mrp\": \"1299.00\",\n      \"selling_price\": \"999.00\",\n      \"store_id\": 2,\n      \"initial_stock\": 10\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Update cotton shirt details",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/products/3",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"SR Essentials Regular-Fit Cotton Shirt\",\n  \"brand\": \"SR Essentials\",\n  \"description\": \"Updated description from Postman.\",\n  \"category\": \"Shirts\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "List store inventory",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{base_url}}/api/inventory?store_id=2"
+      }
+    },
+    {
+      "name": "Set blue medium shirt stock to 25",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/inventory/2",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 25\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

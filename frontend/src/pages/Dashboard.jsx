@@ -1,0 +1,17 @@
+import {useState} from 'react';
+import {Link} from 'react-router-dom';
+import {api, errorMessage, listAll} from '../api/client';
+import {ErrorBox, Field, PageHeader, useLoad} from '../components/Common';
+const load = async () => {const [products, inventory, sellers, stores] = await Promise.all(['/api/products','/api/inventory','/api/sellers','/api/stores'].map(listAll)); return {products, inventory, sellers, stores};};
+export default function Dashboard() {
+  const {data, loading, error, reload} = useLoad(load);
+  const [message, setMessage] = useState(''); const [saving, setSaving] = useState(false);
+  async function submit(event, path) {
+    event.preventDefault(); const form = event.currentTarget;
+    const payload = Object.fromEntries(new FormData(form));
+    if (payload.seller_id) payload.seller_id = Number(payload.seller_id);
+    setSaving(true); setMessage('');
+    try {await api.post(path, payload); form.reset(); reload();} catch(error) {setMessage(errorMessage(error));} finally {setSaving(false);}
+  }
+  return <><PageHeader title="Seller Dashboard" action={<Link className="button" to="/products/new">+ Add product</Link>}>A clear view of your catalog and stock. Ready when you are.</PageHeader><ErrorBox>{error || message}</ErrorBox>{loading ? <p role="status">Loading workspace...</p> : data && <><div className="stats">{[['Products',data.products.length,'In your catalog'],['Stock on hand',data.inventory.reduce((sum,row)=>sum+row.quantity,0),'Units across all stores'],['Stores',data.stores.length,'Inventory locations']].map(([label,value,note])=><section className="stat" key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></section>)}</div><section className="welcome"><div><div className="eyebrow">BUILD YOUR CATALOG</div><h2>Manage Your Fashion Catalog</h2><p>Add your fashion products, organize variants,<br/>and keep stock up to date in one place.</p><Link className="text-link" to="/products">Explore your products &rarr;</Link></div><div className="welcome-art" aria-hidden="true"><div className="swatch one">S / M / L</div><div className="swatch two">THE<br/>EVERYDAY<br/>EDIT<span>YOUR NEXT COLLECTION</span></div></div></section><div className="section-heading"><h2>Seller and Store Setup</h2><span>Create a seller and store before adding products</span></div><div className="setup-grid"><form className="panel" onSubmit={event=>submit(event,'/api/sellers')}><h3>01 / Seller profile</h3><Field label="Seller name"><input name="name" required maxLength="200" placeholder="Your business name"/></Field><Field label="Email"><input name="email" type="email" required maxLength="254" placeholder="owner@example.com"/></Field><button disabled={saving}>Create seller</button><small>{data.sellers.length} seller profile(s) created</small></form><form className="panel" onSubmit={event=>submit(event,'/api/stores')}><h3>02 / Store location</h3><Field label="Seller"><select name="seller_id" required defaultValue=""><option value="" disabled>Select seller</option>{data.sellers.map(row=><option key={row.id} value={row.id}>{row.name}</option>)}</select></Field><Field label="Store name"><input name="name" required maxLength="200" placeholder="Main store"/></Field><Field label="Address"><input name="address" required maxLength="500" placeholder="Store address"/></Field><button disabled={saving || !data.sellers.length}>Create store</button></form></div></>}</>;
+}
