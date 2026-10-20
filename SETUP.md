@@ -1,5 +1,15 @@
 # Setup and operation
 
+## Fresh-clone prerequisite setup
+
+**start.bat starts configured services; it does not install prerequisites or dependencies.**
+A fresh clone must complete the one-time steps below first. Git does not include local
+.env files, Python virtual environments, node_modules, database volumes or business data.
+
+For agent-assisted installation, copy the detailed [Copilot local setup prompt](docs/COPILOT_LOCAL_SETUP_PROMPT.md)
+into Copilot Chat in Agent mode. It covers prerequisite installation, architecture checks,
+Docker/WSL2, configuration, startup, verification and troubleshooting.
+
 ## One-click Windows startup
 
 Double-click **start.bat** in the project folder, or run ` .\start.bat` from
@@ -21,25 +31,25 @@ waiting for a keypress. Startup errors remain visible in the launcher window.
 
 ## Prerequisites
 
-- Python 3.12+; on this Windows ARM machine use installed **x64 Python 3.12** for
+- Python **3.12 x64** for the tested Windows environment; use x64 Python on Windows ARM for
   the psycopg binary wheel. ARM64 Python 3.13 could not install that wheel.
-- Node.js LTS (installed 24.19.0), npm, Git.
+- Node.js **24 LTS** (or a verified compatible release), npm and Git for Windows.
 - Docker Desktop with Linux containers and WSL2 running on Windows.
 - Free local ports 5432, 8000, 5173.
 
 Open a new PowerShell after installing tools so PATH includes Node, Docker and Git.
-Commands below start at `C:\Users\Surendra\Fashion-Seller\sr-fashionns`.
+Replace the placeholder checkout path with your actual directory. Commands below start at `C:\path\to\sr-fashions-seller-platform`.
 Use `npm.cmd` on Windows to avoid PowerShell script execution-policy issues.
 
 ## Environment
 
-Local `.env`, `backend/.env`, and `frontend/.env` were created automatically for
-this workspace. Do not overwrite them with examples.
+Local .env files must be created separately on each computer. Preserve any existing
+configuration; do not overwrite it with placeholder examples.
 
 For a fresh checkout only:
 
 ```powershell
-python .\scripts\init_env.py
+py -3.12 .\scripts\init_env.py
 ```
 
 The script generates one random password consistently for Compose and the backend,
@@ -50,15 +60,19 @@ port, update both root `.env` and backend DATABASE_URL. PostgreSQL initializes
 credentials only for an empty volume; changing `.env` does not rotate an existing
 role password. Preserve the volume and rotate via PostgreSQL if necessary.
 
-## Install dependencies (already completed in this workspace)
+## Install dependencies once on each machine
 
 ```powershell
-cd C:\Users\Surendra\Fashion-Seller\sr-fashionns\backend
-& "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe" -m venv .venv312
+cd C:\path\to\sr-fashions-seller-platform\backend
+py -3.12 -m venv .venv312
 .\.venv312\Scripts\python.exe -m pip install -r requirements.lock.txt
 cd ..\frontend
 npm.cmd ci
 ```
+
+Verify the selected interpreter architecture before creating the environment. On a
+machine with several Python installations, invoke the verified x64 Python 3.12 executable
+explicitly if the launcher selects a different architecture.
 
 For other operating systems or Python versions, create a normal virtual environment
 and install `requirements.txt`; `requirements.lock.txt` records this verified Python
@@ -67,7 +81,7 @@ and install `requirements.txt`; `requirements.lock.txt` records this verified Py
 ## Start database and apply migrations
 
 ```powershell
-cd C:\Users\Surendra\Fashion-Seller\sr-fashionns
+cd C:\path\to\sr-fashions-seller-platform
 docker compose up -d --wait
 cd backend
 .\.venv312\Scripts\python.exe -m alembic upgrade head
@@ -78,14 +92,14 @@ cd backend
 ## Start backend (terminal 1)
 
 ```powershell
-cd C:\Users\Surendra\Fashion-Seller\sr-fashionns\backend
+cd C:\path\to\sr-fashions-seller-platform\backend
 .\.venv312\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 ## Start frontend (terminal 2)
 
 ```powershell
-cd C:\Users\Surendra\Fashion-Seller\sr-fashionns\frontend
+cd C:\path\to\sr-fashions-seller-platform\frontend
 npm.cmd run dev
 ```
 
@@ -97,7 +111,7 @@ Swagger documentation: http://127.0.0.1:8000/docs.
 ## Verify
 
 ```powershell
-cd C:\Users\Surendra\Fashion-Seller\sr-fashionns\backend
+cd C:\path\to\sr-fashions-seller-platform\backend
 .\.venv312\Scripts\python.exe -m pytest -q
 .\.venv312\Scripts\python.exe ..\scripts\smoke.py
 Invoke-RestMethod http://127.0.0.1:8000/health
@@ -151,9 +165,9 @@ See VALIDATION.md for the exact checks performed in this workspace.
 
 ## Catalog products and Postman
 
-Five catalog products are available under seller 2 and store 2, with six variants
-and 85 initial units. Product IDs: 3 (shirt), 4 (jeans), 5 (kurta), 6 (T-shirt),
-7 (hoodie). The hoodie starts out of stock. Categories are internal labels.
+A fresh database is empty: the original merchant records and PostgreSQL volume are
+not included in Git. Create a seller/store and products through the UI, or explicitly
+opt in to the sample catalog below. Sample IDs differ between computers.
 
 To seed a fresh running instance, from the project root run:
 
@@ -170,14 +184,17 @@ GET requests read data; POST/PUT requests modify catalog data when sent. The cre
 request uses Postman's timestamp variable in the SKU to avoid ordinary duplicate
 submissions. Duplicate SKUs return 409. No authentication is configured locally.
 
-## Complete the project folder rename
 
-If Windows locks `ondc-fashion-seller`, stop both app servers and close the IDE.
-From a separate PowerShell outside the project folder, run:
+## Current ONDC discovery and tests
 
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Users\Surendra\Fashion-Seller\rename-to-sr-fashionns.ps1
-```
+Ordinary seller/admin startup needs no ONDC signing key or Registry access. Local
+network-discovery setup is separate: see [ONDC_DISCOVERY.md](docs/ONDC_DISCOVERY.md).
+Do not perform onboarding as part of prerequisite installation.
 
-Reopen `C:\Users\Surendra\Fashion-Seller\sr-fashionns`. Compose retains its
-existing project identity so the PostgreSQL volume and catalog remain available.
+Run tests from the backend directory. At this revision the default suite has 148
+passing tests and one optional PostgreSQL test skipped. ONDC_TEST_POSTGRES=1 enables
+the isolated PostgreSQL migration/worker test (previously 149 total passing tests).
+See [ONDC_VALIDATION.md](docs/ONDC_VALIDATION.md) for verification boundaries.
+
+For the complete install-and-run agent instructions, use
+[COPILOT_LOCAL_SETUP_PROMPT.md](docs/COPILOT_LOCAL_SETUP_PROMPT.md).

@@ -4,7 +4,9 @@ FastAPI/PostgreSQL inventory backend and React retailer administration workspace
 Target future domain: **ONDC:RET12**. This is an internal retail application, not
 an ONDC-compliant protocol implementation or a customer storefront.
 
-See [SETUP.md](SETUP.md) for installation, startup, tests, migrations, and troubleshooting.
+A fresh clone needs one-time prerequisite and dependency installation before start.bat works.
+See [SETUP.md](SETUP.md) for the steps, or copy the detailed
+[Copilot local setup prompt](docs/COPILOT_LOCAL_SETUP_PROMPT.md) into Copilot Chat in Agent mode.
 
 ## Architecture
 
@@ -14,7 +16,7 @@ See [SETUP.md](SETUP.md) for installation, startup, tests, migrations, and troub
 - `backend/app/schemas/`: Pydantic v2 inputs and outputs.
 - `backend/app/api/`: internal REST endpoints.
 - `backend/app/services/`: transactional catalog and ownership validation.
-- `backend/app/ondc/{routes,schemas,signing,registry,catalog}/`: empty future integration boundaries.
+- `backend/app/ondc/{routes,schemas,signing,registry,catalog}/`: isolated local discovery, schemas, signing, lookup and catalog mapping.
 - `backend/alembic/`: explicit, versioned database migrations.
 - `backend/tests/`: isolated SQLite behavior tests with foreign keys enabled.
 - `frontend/src/{api,components,pages,layouts}/`: admin SPA, shared Axios client.
@@ -58,8 +60,10 @@ supports search. Add Product creates one initial variant (API supports multiple)
 Inventory supports store filtering and quantity editing. Orders, Returns and
 ONDC Settings are explicit placeholders.
 
-No ONDC protocol API, registry onboarding, payload schema, taxonomy, signing, or
-private-key handling exists. Category, color, and size are free-text internal fields.
+Local ONDC discovery, payload schemas, taxonomy mapping and signing are implemented.
+External network communication defaults disabled; no Registry onboarding has occurred.
+See [ONDC_DISCOVERY.md](docs/ONDC_DISCOVERY.md) for the supported profile and limits.
+Category, color and size remain free-text internal fields with explicit publication mapping.
 
 This local foundation has no authentication/authorization yet. Run it on loopback;
 add access control before a shared deployment. Inventory uses absolute quantity
@@ -69,8 +73,8 @@ No automatic schema creation runs at application startup; use Alembic.
 
 `.env` files and virtual environments are ignored. Only the public API URL belongs
 in `frontend/.env`; all `VITE_` values are public browser configuration. Random local
-database credentials are generated outside source code. No remote repository or
-cloud deployment is configured.
+database credentials are generated outside source code. The source repository is [tnsurendra/sr-fashions-seller-platform](https://github.com/tnsurendra/sr-fashions-seller-platform).
+No cloud deployment is configured.
 
 Implementation references: [FastAPI testing](https://fastapi.tiangolo.com/tutorial/testing/),
 [SQLAlchemy relationships](https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html),
