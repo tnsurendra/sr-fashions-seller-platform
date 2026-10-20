@@ -10,6 +10,19 @@ For agent-assisted installation, copy the detailed [Copilot local setup prompt](
 into Copilot Chat in Agent mode. It covers prerequisite installation, architecture checks,
 Docker/WSL2, configuration, startup, verification and troubleshooting.
 
+## First-run checklist
+
+- [ ] Git, Python 3.12 x64, Node/npm and Docker Desktop are installed.
+- [ ] WSL2 and Docker's Linux-container engine are ready.
+- [ ] Root, backend and frontend .env files contain matching local configuration.
+- [ ] Backend dependencies are installed in backend/.venv312.
+- [ ] Frontend dependencies are installed using npm.cmd ci.
+- [ ] Ports 5432, 8000 and 5173 are available or used by the healthy matching app.
+- [ ] Run start.bat and verify backend health plus the admin page.
+
+The [Copilot setup prompt](docs/COPILOT_LOCAL_SETUP_PROMPT.md) walks through each item,
+including installation and troubleshooting. After setup, future starts need only start.bat.
+
 ## One-click Windows startup
 
 Double-click **start.bat** in the project folder, or run ` .\start.bat` from
