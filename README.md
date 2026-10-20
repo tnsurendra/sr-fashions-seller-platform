@@ -8,6 +8,34 @@ A fresh clone needs one-time prerequisite and dependency installation before sta
 See [SETUP.md](SETUP.md) for the steps, or copy the detailed
 [Copilot local setup prompt](docs/COPILOT_LOCAL_SETUP_PROMPT.md) into Copilot Chat in Agent mode.
 
+## App screenshots
+
+Captured from the running local application. Catalog records and stock counts vary by installation; a fresh database starts empty.
+
+### Seller dashboard
+
+Catalog totals, stock overview, and seller/store setup.
+
+![SR Fashions seller dashboard with catalog statistics and workspace setup](docs/screenshots/dashboard.png)
+
+### Product catalog
+
+Products with their brands, categories, SKU variants, and INR pricing.
+
+![SR Fashions product catalog showing variants and prices](docs/screenshots/products.png)
+
+### Inventory
+
+Stock by store and variant, including out-of-stock indicators.
+
+![SR Fashions inventory with store-level stock and availability](docs/screenshots/inventory.png)
+
+### Add a product
+
+Product details, variant pricing, and opening-stock form.
+
+![SR Fashions add-product form for product details, variants, and opening stock](docs/screenshots/add-product.png)
+
 ## Architecture
 
 - `backend/app/main.py`: application, CORS, health, safe database error responses.
