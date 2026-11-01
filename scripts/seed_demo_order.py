@@ -16,7 +16,7 @@ from app.database import get_engine
 from app.models import Inventory, ProductVariant
 from app.ondc.models import (
     CheckoutIntent, FinancialEvent, ONDCOrder, ONDCOrderItem,
-    OrderStateEvent, ReturnRequest,
+    OrderStateEvent, ReturnRequest, CatalogSubscription, CatalogPublicationJob,
 )
 
 ORDER_ID = "DEMO-ONDC-ORDER-001"
@@ -24,6 +24,37 @@ TRANSACTION_ID = "demo-ondc-transaction-001"
 SKU = "SR-SHIRT-BLUE-M"
 
 with Session(get_engine()) as db:
+    sync_transaction = "demo-catalog-subscription-001"
+    subscription = db.scalar(select(CatalogSubscription).where(
+        CatalogSubscription.bap_id == "demo-buyer.invalid",
+        CatalogSubscription.transaction_id == sync_transaction,
+    ))
+    if subscription is None:
+        sync_now = time.time()
+        subscription = CatalogSubscription(
+            bap_id="demo-buyer.invalid", bap_uri="https://demo-buyer.invalid/ondc",
+            transaction_id=sync_transaction, status="active", interval_seconds=300,
+            cursor_at=sync_now - 900, next_run_at=sync_now + 300,
+            created_at=sync_now - 1800, updated_at=sync_now,
+        )
+        db.add(subscription)
+        db.flush()
+        for offset, status, attempts, error in [
+            (-900, "delivered", 1, None),
+            (-600, "failed", 2, "HTTP callback failed"),
+            (-300, "pending", 0, None),
+        ]:
+            db.add(CatalogPublicationJob(
+                subscription_id=subscription.id, window_start=sync_now + offset,
+                window_end=sync_now + offset + 300, status=status, attempts=attempts,
+                lease_until=0, next_attempt_at=sync_now + (60 if status == "failed" else 0),
+                error=error, created_at=sync_now + offset + 300,
+            ))
+        db.commit()
+        print("CREATED synthetic catalog subscription with delivered, failed and pending jobs")
+    else:
+        print("SKIP existing synthetic catalog subscription")
+
     existing = db.get(ONDCOrder, ORDER_ID)
     if existing:
         print(f"SKIP existing synthetic demo order: {ORDER_ID}")

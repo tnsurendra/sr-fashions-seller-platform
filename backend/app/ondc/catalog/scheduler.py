@@ -9,7 +9,9 @@ from app.ondc.validators.discovery import validate_search
 from app.ondc.clients.http import CallbackError
 
 def iso(value):
-    return datetime.fromtimestamp(value, timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    # Preserve the persisted window boundary. Millisecond truncation could exclude a
+    # catalog mutation occurring later in the same millisecond and mark the job empty.
+    return datetime.fromtimestamp(value, timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 def schedule_due(db, now=None):
     now = now or time.time()

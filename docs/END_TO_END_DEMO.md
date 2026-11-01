@@ -101,10 +101,11 @@ pre-pickup eligibility, restores stock once under a database lock, and records a
 obligation rather than claiming a completed refund. Supported delivered-item return
 initiation validates reason `003`, purchased quantity, catalog eligibility and window.
 
-The standalone Returns page remains a transparent roadmap boundary; implemented return
-actions are attached to each order.
+The Returns page aggregates persisted requests across orders. An operator can open the
+related order for the complete history and authenticated decisions; this keeps the
+decision in its order context while still providing an operational queue.
 
-![Standalone returns boundary](screenshots/returns.png)
+![Returns queue with approved demonstration request](screenshots/returns.png)
 
 ## 6. Catalog synchronization and recovery
 
@@ -115,8 +116,9 @@ covered by automated tests.
 
 ![Catalog synchronization status](screenshots/ondc-settings.png)
 
-An empty screen means no external subscription has been accepted in this local database;
-it does not mean the scheduler code is absent.
+The seeded `.invalid` buyer demonstrates an active subscription and delivered, failed and
+pending job states without contacting an external participant. Failure text is sanitized
+and the attempts column makes retry behavior observable.
 
 ## 7. Registry onboarding readiness
 

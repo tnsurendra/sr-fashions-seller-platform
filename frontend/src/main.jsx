@@ -8,6 +8,6 @@ import AddProduct from './pages/AddProduct';
 import Inventory from './pages/Inventory';
 import Orders from './pages/Orders';
 import OndcSettings from './pages/OndcSettings';
-import Placeholder from './pages/Placeholder';
+import Returns from './pages/Returns';
 import './styles.css';
-ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter><Routes><Route element={<AdminLayout/>}><Route index element={<Dashboard/>}/><Route path="products" element={<Products/>}/><Route path="products/new" element={<AddProduct/>}/><Route path="inventory" element={<Inventory/>}/><Route path="orders" element={<Orders/>}/><Route path="returns" element={<Placeholder title="Returns" description="Return requests are managed from each ONDC order."/>}/><Route path="ondc-settings" element={<OndcSettings/>}/><Route path="*" element={<section className="panel"><h1>Page not found</h1><Link to="/">Back to dashboard</Link></section>}/></Route></Routes></BrowserRouter></React.StrictMode>);
+ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><BrowserRouter><Routes><Route element={<AdminLayout/>}><Route index element={<Dashboard/>}/><Route path="products" element={<Products/>}/><Route path="products/new" element={<AddProduct/>}/><Route path="inventory" element={<Inventory/>}/><Route path="orders" element={<Orders/>}/><Route path="returns" element={<Returns/>}/><Route path="ondc-settings" element={<OndcSettings/>}/><Route path="*" element={<section className="panel"><h1>Page not found</h1><Link to="/">Back to dashboard</Link></section>}/></Route></Routes></BrowserRouter></React.StrictMode>);

@@ -75,22 +75,22 @@ authenticated ONDC purchase flow.
 
 ![Expanded synthetic order showing item, fulfillment history, financial audit and approved return](docs/screenshots/orders.png)
 
-### 6. Returns workflow boundary
+### 6. Review return requests
 
-The separate **Returns** route currently explains that it is planned. Supported RET12
-return initiation and authenticated approve/reject decisions are implemented inside the
-relevant confirmed order on the Orders page. Reverse pickup, QC, liquidation, replacement
-and actual refund execution remain explicitly unsupported until their governing profiles
-are verified and implemented.
+The **Returns** screen provides a cross-order view of request ID, order, item, quantity,
+reason, status and request time. Open the related order for its full audit trail and for
+authenticated approve/reject decisions on initiated requests. The demo record shows an
+approved reason `003` return. Reverse pickup, QC, liquidation, replacement and actual
+refund execution remain explicitly unsupported until their profiles are implemented.
 
-![Returns page documenting that standalone return management is planned](docs/screenshots/returns.png)
+![Returns page showing an approved sample request and its related order and item](docs/screenshots/returns.png)
 
 ### 7. Monitor ONDC catalog synchronization
 
 Choose **ONDC Settings** to inspect durable incremental subscriptions and publication
-jobs. Active or failed work appears here after a valid catalog incremental request and
-the scheduler persists it. The sample screen is empty because no external Buyer App or
-Registry was contacted while preparing this public repository.
+jobs. The synthetic demonstration shows an active buyer subscription plus pending,
+failed/retrying and delivered jobs, including attempt counts and a safe failure summary.
+The `.invalid` buyer makes clear that no external Buyer App or Registry was contacted.
 
 ![ONDC Settings page showing catalog subscription and publication-job status](docs/screenshots/ondc-settings.png)
 
