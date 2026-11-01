@@ -10,10 +10,15 @@ from app.ondc.schemas.tags import TagGroup
 
 
 class StorePublication(WireModel):
+    enabled: bool = True
     gps: Text
     address: Address
     hours: Hours
     tags: list[TagGroup] = Field(min_length=1)
+    # Optional order terms are internal publication inputs. They map to official
+    # quote/fulfillment fields only when purchase flow is enabled for the store.
+    delivery_charge: str | None = Field(default=None, pattern=r"^[0-9]+(?:\.[0-9]{1,2})?$")
+    fulfillment_tat: Duration | None = None
 
     @field_validator("gps")
     @classmethod

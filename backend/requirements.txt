@@ -9,3 +9,4 @@ httpx>=0.28,<1
 pytest>=8.3,<10
 jsonschema>=4.23,<5
 PyNaCl>=1.5,<2
+cryptography>=44,<47

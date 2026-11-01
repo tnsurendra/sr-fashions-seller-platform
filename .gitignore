@@ -19,6 +19,10 @@ dist/
 
 # Local business-data backups
 backups/
+secrets/
+.env.production
+*.backup
+*.dump
 *.pem
 *.p12
 *.pfx

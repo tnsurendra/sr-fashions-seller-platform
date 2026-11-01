@@ -16,7 +16,8 @@ from decimal import Decimal
 from typing import Literal
 from app.ondc.schemas.base import Text
 from pydantic import Field
-from app.ondc.models import SellerPublication, StorePublicationRow, ProductPublicationRow
+from app.ondc.models import SellerPublication, StorePublicationRow, ProductPublicationRow, CatalogPublicationState
+import time
 
 class FinderFeePolicy(WireModel):
     # Internal merchant policy using the published finder-fee term names.
@@ -76,6 +77,16 @@ def put(db, row_type, key, identity, data, enabled=None):
         row.data = data
     if enabled is not None:
         row.enabled = enabled
+    entity_type = {SellerPublication: "provider", StorePublicationRow: "store", ProductPublicationRow: "product"}[row_type]
+    state = db.scalar(select(CatalogPublicationState).where(
+        CatalogPublicationState.entity_type == entity_type, CatalogPublicationState.entity_id == identity))
+    if state is None:
+        state = CatalogPublicationState(entity_type=entity_type, entity_id=identity,
+            state="pending", changed_at=time.time())
+        db.add(state)
+    else:
+        state.state, state.changed_at = "pending", time.time()
+        state.rejection_code = state.rejection_message = None
     db.commit()
     return row
 

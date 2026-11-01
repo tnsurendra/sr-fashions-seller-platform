@@ -3,6 +3,12 @@
 
 Completed October 8, 2026 (America/New_York). This is a local development result, not ONDC network certification. The preceding foundation stage passed 89 tests; it remains the baseline for this extension.
 
+Revalidated October 30, 2026 (America/New_York): **149 tests passed** with `ONDC_TEST_POSTGRES=1`, including PostgreSQL migration and concurrent-worker coverage. The official ONDC developer index continues to identify B2C Retail 1.2.5 as Latest. No external Registry, gateway, PreProd, Production or onboarding call was made during revalidation.
+
+Prompt 3 extension completed October 30, 2026: **158 tests passed** with PostgreSQL enabled and migration head `0004`. Added one-time incremental catalog pull/state/rejection handling, signed select/init/confirm callbacks, durable checkout/order persistence, PostgreSQL last-unit locking, and React ONDC order visibility. See [ONDC_ORDER_DESIGN.md](ONDC_ORDER_DESIGN.md) and [PROMPT_3_COMPLETION_REPORT.md](PROMPT_3_COMPLETION_REPORT.md). Continuous incremental push and live interoperability remain UNVERIFIED/deferred.
+
+Prompt 4 local result: **163 tests passed** with PostgreSQL enabled; migration `0005` is head and Alembic reports no drift. Signed status/cancel/update, state history, authenticated fulfillment administration, idempotent cancellation/inventory restoration, constrained return initiation/decision, immutable accounting, durable catalog subscriptions/jobs/recovery, and React operations/status views pass locally. No external network, payment or refund action occurred.
+
 ## 1. Baseline test result
 
 Before code edits, the complete existing suite passed **89 tests**, zero failures. The original audit/reference snapshots were inspected and preserved. The same pre-existing Starlette/httpx TestClient deprecation warning was present before this task.

@@ -77,7 +77,7 @@ def test_context_valid_official_strings(context):
     assert Context.model_validate(context).city == "*"
 
 
-@pytest.mark.parametrize("field,value", [("domain", "ONDC:RET10"), ("action", "confirm"),
+@pytest.mark.parametrize("field,value", [("domain", "ONDC:RET10"), ("action", "track"),
     ("core_version", "2.0.2"), ("country", "IN"), ("city", "Bengaluru"),
     ("timestamp", "2026-10-07T12:00:00"), ("timestamp", "2026-02-30T12:00:00Z"),
     ("ttl", "PT31S"), ("ttl", "P1D"), ("ttl", "PT0S"), ("ttl", "30"),
@@ -313,8 +313,10 @@ def test_admin_app_remains_isolated(client, monkeypatch):
     monkeypatch.setenv("ONDC_DOMAIN", "invalid")
     assert client.get("/").json()["name"] == "SR Fashions"
     assert client.get("/health").status_code == 200
-    for path in ["/select", "/init", "/confirm", "/status", "/cancel", "/update", "/on_search"]:
+    for path in ["/track", "/on_search"]:
         assert client.post(path, json={}).status_code == 404
+    for path in ["/select", "/init", "/confirm", "/status", "/cancel", "/update"]:
+        assert client.post(path, json={}).json()["message"]["ack"]["status"] == "NACK"
     assert client.post("/search", json={}).json()["message"]["ack"]["status"] == "NACK"
     assert "ONDC_SIGNING_PRIVATE_KEY" not in client.get("/openapi.json").text
 

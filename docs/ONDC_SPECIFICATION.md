@@ -2,6 +2,8 @@
 
 Retail B2C **1.2.5** / RET12 / ISN is still the selected contract. The historical foundation-only limits below have been extended with publication persistence, signing, replay protection, mocked Registry lookup and local search/on_search. The preserved schema reconciliations and taxonomy remain unchanged. See [ONDC_SECURITY.md](ONDC_SECURITY.md) for additional official sources, signing/lookup conflicts and UNVERIFIED network behavior; [ONDC_DISCOVERY.md](ONDC_DISCOVERY.md) for current supported flow; [ONDC_VALIDATION.md](ONDC_VALIDATION.md) for 149 passing tests. No real network or onboarding activity occurred.
 
+Revalidated October 30, 2026 (America/New_York): the official ONDC developer index still lists **B2C Retail 1.2.5 (Latest)**, the official signing guide still specifies BLAKE-512/Ed25519 signing and Registry-backed key verification, and the complete PostgreSQL-enabled local suite passes 149 tests. The foundation-era sections below are retained as implementation history; statements in them about discovery not yet being implemented do not describe the current application.
+
 # Official ONDC source selection and supported profile
 
 Verified on October 7, 2026 (America/New_York). This foundation targets Retail B2C **1.2.5**, ONDC:RET12, Seller, Inventory Seller Node (**ISN**). It does not enable network communication.
@@ -55,7 +57,9 @@ Fashion attribute enums are **suggestive**, not exhaustive (note 384); custom re
 - Serviceability must exist for each published location/category. Only one serviceability level is allowed per location/category (note 113); type codes 10–13 are defined in note 115. This stage checks structure and pan-India IND/country; full radius/pincode/polygon geometry and city coverage validation remains a later validator gap.
 - PublicationProfile is an internal input DTO, not an ONDC payload or database redesign. Mapper revalidates it and performs no writes, network calls or inventory changes. Callers should pass fully loaded ORM snapshots under a read-only/no-autoflush session; creating a PostgreSQL repeatable-read publication snapshot and incremental cursors remains future work.
 
-## Configuration and security
+## Historical foundation configuration and security
+
+The following two paragraphs record the pre-discovery foundation state. They are superseded by the current implementation documented in ONDC_SECURITY.md and ONDC_DISCOVERY.md.
 
 ONDCSettings reads ONDC_-prefixed backend environment variables and loads lazily. Environment defaults to local; specifying preprod/production only validates settings and makes no connections. Subscriber ID/URL/callback URL/key ID/city must be explicitly supplied. Subscriber and callback hostnames must match identity; nonlocal settings require HTTPS. Protocol/domain/role/node type are pinned to this supported profile. Optional signing private key is SecretStr, excluded from serialization and repr, and never reaches React or OpenAPI. No private key has been created, committed or used; signing itself remains unimplemented. CALLBACK_URL is a configured seller-side callback base for future services, not a substitute for the buyer callback context.bap_uri.
 

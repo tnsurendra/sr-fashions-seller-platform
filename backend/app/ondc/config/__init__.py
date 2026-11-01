@@ -41,18 +41,29 @@ class ONDCSettings(RouteSettings):
     unique_key_id: Identity
     country: Literal["IND"] = "IND"
     city: Annotated[str, StringConstraints(pattern=r"^std:[0-9]+$")]
+    supported_cities: list[Annotated[str, StringConstraints(pattern=r"^std:[0-9]+$")]] = []
     protocol_version: Literal["1.2.5"] = "1.2.5"
     external_network_enabled: bool = False
     registry_url: Url | None = None
     http_timeout: float = Field(default=5, gt=0, le=60)
     registry_cache_seconds: int = Field(default=60, ge=0, le=300)
     replay_retention_seconds: int = Field(default=86400, ge=3600)
+    catalog_sync_interval_seconds: int = Field(default=300, ge=60, le=1800)
     allow_local_peer_search: bool = False
     allow_local_callbacks: bool = False
     signing_private_key: SecretStr | None = Field(default=None, exclude=True, repr=False)
+    signing_public_key: str | None = None
+    encryption_private_key: SecretStr | None = Field(default=None, exclude=True, repr=False)
+    encryption_public_key: str | None = None
+    onboarding_request_id: Identity | None = None
+    registry_public_key: str | None = None
 
     @model_validator(mode="after")
     def identity_urls(self):
+        if not self.supported_cities:
+            self.supported_cities = [self.city]
+        if self.city not in self.supported_cities:
+            raise ValueError("Primary city must be included in supported cities")
         # Subscriber identity is a hostname, not a URL.
         if urlsplit(self.subscriber_url).hostname != self.subscriber_id:
             raise ValueError("subscriber_url hostname must match subscriber_id")
@@ -64,6 +75,23 @@ class ONDCSettings(RouteSettings):
             raise ValueError("Development options require local environment")
         if self.environment == "production":
             raise ValueError("Production discovery is outside the supported development scope")
+        if self.environment == "preprod":
+            required = {
+                "signing_private_key": self.signing_private_key,
+                "signing_public_key": self.signing_public_key,
+                "encryption_private_key": self.encryption_private_key,
+                "encryption_public_key": self.encryption_public_key,
+                "onboarding_request_id": self.onboarding_request_id,
+                "registry_public_key": self.registry_public_key,
+                "registry_url": self.registry_url,
+            }
+            missing = [name for name, value in required.items() if not value]
+            if missing:
+                raise ValueError("Incomplete PreProd configuration: " + ", ".join(missing))
+            if self.registry_url != "https://preprod.registry.ondc.org/v2.0/lookup":
+                raise ValueError("PreProd Registry lookup URL must use the official v2.0 endpoint")
+            if not self.external_network_enabled:
+                raise ValueError("PreProd requires explicit ONDC_EXTERNAL_NETWORK_ENABLED=true")
         return self
 
 

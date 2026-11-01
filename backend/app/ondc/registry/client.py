@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.ondc.schemas.base import HttpUrl, Timestamp, Text
 from app.ondc.signing.crypto import decode
 from app.ondc.clients.http import SignedClient, CallbackError
+from app.operations import increment
 
 class RegistryError(RuntimeError):
     pass
@@ -67,8 +68,11 @@ class RegistryClient:
             if len(self.cache) >= 512:
                 self.cache.clear()
             self.cache[key] = (min(now + self.settings.registry_cache_seconds, end), record)
+            increment("registry_lookup_success_total")
             return record
         except SubscriberNotFound:
+            increment("registry_lookup_not_found_total")
             raise
         except (CallbackError, ValueError, TypeError):
+            increment("registry_lookup_failed_total")
             raise RegistryError("Registry lookup failed") from None

@@ -62,3 +62,15 @@ The planned isolated foundation is implemented. Configuration, schemas, mapper, 
 | Local integration | Six-variant mock buyer test, real loopback HTTP, PostgreSQL migration/worker races; 149 passing tests |
 
 Remaining: actual merchant enrichment; source ambiguities explicitly marked UNVERIFIED in security docs; wider catalog profiles, incremental refresh/disabled stores and rejection handling; admin authentication and deployment egress/observability; key lifecycle; all order/payment/fulfillment/return work. No onboarding or external network validation occurred. External communication defaults disabled.
+
+## Prompt 3 order extension — October 30, 2026
+
+Implemented locally: one-time incremental pull with changed-item filtering and required response header; disabled-store exclusion; publication pending/published/rejected tracking; authenticated `/select`, `/init`, `/confirm`; signed asynchronous callbacks; durable quote/checkouts/orders/items; atomic PostgreSQL stock commitment and idempotent retry; and a privacy-minimized React Orders view.
+
+Remaining gaps: continuous incremental push subscriptions; explicit provider/store disable event payloads; automated external catalog/store rejection ingestion; offers/customizations/split fulfillment/self-pickup purchase; broader official payment/settlement profiles; checkout cleanup scheduling; admin authentication and customer-data retention controls; status/cancel/update/returns/refunds/exchanges; and live Registry/gateway/PreProd interoperability. Local tests do not establish ONDC certification.
+
+## Prompt 4 post-order extension
+
+Implemented locally: signed status; Buyer TAT-breach cancellation reason `006`; atomic one-time inventory restoration; refund-obligation audit; constrained reason `003` return initiation; authenticated return decisions and fulfillment transitions; append-only state/financial history; durable `catalog_inc` start/stop subscriptions, worker leases, retry/backoff and restart recovery; React order detail and catalog-sync status.
+
+Remaining: verified seller force-cancel reason governance; reverse pickup/QC/liquidation; actual refunds and settlement confirmation; exchange/replacement; partial cancellation/refund profiles; richer P2H2P logistics; automatic admin identity/roles beyond a backend token; external scheduler deployment; live catalog rejection ingestion; and all PreProd interoperability.

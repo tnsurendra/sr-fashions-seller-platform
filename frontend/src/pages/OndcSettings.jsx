@@ -1,0 +1,7 @@
+import {api} from '../api/client';
+import {ErrorBox, PageHeader, useLoad} from '../components/Common';
+const load = async () => (await api.get('/api/ondc/catalog-sync')).data;
+export default function OndcSettings() {
+  const {data,loading,error,reload}=useLoad(load);
+  return <><PageHeader title="ONDC Settings" action={<button className="secondary" onClick={reload}>Refresh</button>}>Local catalog synchronization health. Network credentials are never displayed.</PageHeader><ErrorBox>{error}</ErrorBox><section className="panel">{loading?<p role="status">Loading synchronization state...</p>:<><h2>Subscriptions</h2>{data?.subscriptions.length?<div className="table-wrap"><table><thead><tr><th>Buyer</th><th>Status</th><th>Interval</th><th>Next run</th></tr></thead><tbody>{data.subscriptions.map(row=><tr key={row.id}><td>{row.bap_id}</td><td><span className="badge">{row.status}</span></td><td>{row.interval_seconds}s</td><td>{new Date(row.next_run_at*1000).toLocaleString()}</td></tr>)}</tbody></table></div>:<p className="muted">No continuous incremental subscriptions.</p>}<h2>Publication jobs</h2>{data?.jobs.length?<div className="table-wrap"><table><thead><tr><th>Job</th><th>Status</th><th>Attempts</th><th>Failure</th></tr></thead><tbody>{data.jobs.map(row=><tr key={row.id}><td>{row.id}</td><td><span className="badge">{row.status}</span></td><td>{row.attempts}</td><td>{row.error||'—'}</td></tr>)}</tbody></table></div>:<p className="muted">No publication jobs.</p>}</>}</section></>;
+}

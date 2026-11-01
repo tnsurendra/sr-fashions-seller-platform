@@ -85,24 +85,57 @@ dependent records cannot be deleted (409). Validation returns 422, absent resour
 
 Dashboard includes seller/store setup, catalog counts and stock totals. Products
 supports search. Add Product creates one initial variant (API supports multiple).
-Inventory supports store filtering and quantity editing. Orders, Returns and
-ONDC Settings are explicit placeholders.
+Inventory supports store filtering and quantity editing. Orders now shows the
+persisted ONDC order, fulfillment, state, financial and return audit trails. ONDC
+Settings shows durable catalog-subscription and publication-job status.
 
-Local ONDC discovery, payload schemas, taxonomy mapping and signing are implemented.
-External network communication defaults disabled; no Registry onboarding has occurred.
-See [ONDC_DISCOVERY.md](docs/ONDC_DISCOVERY.md) for the supported profile and limits.
-Category, color and size remain free-text internal fields with explicit publication mapping.
+### Current ONDC progress
 
-This local foundation has no authentication/authorization yet. Run it on loopback;
-add access control before a shared deployment. Inventory uses absolute quantity
-replacement, with last-write-wins behavior. It is not a reservation or order ledger.
+- Retail B2C 1.2.5 / `ONDC:RET12` Seller ISN discovery and signed callbacks.
+- Authenticated `select`, `init`, `confirm`, `status`, supported `cancel` and constrained
+  return `update` flows with replay protection, durable retries and PostgreSQL locking.
+- Atomic inventory commitment/restoration, order history, financial-event audit and
+  authenticated fulfillment/return administration.
+- Full and incremental catalog publication, persistent synchronization jobs and recovery.
+- Ed25519 signing, Registry v2 lookup, X25519 onboarding keys, site verification,
+  `/on_subscribe`, redacted subscription preview and a read-only readiness CLI.
+- Production-like Compose scaffolding with HTTPS proxy, isolated PostgreSQL, background
+  worker, health/readiness endpoints, structured logs and operational metrics.
+- Current local verification: 167 backend tests pass with PostgreSQL concurrency enabled,
+  Alembic is at migration 0005 with no drift, React production build and live smoke pass.
+
+See [Prompt 5 completion](docs/PROMPT_5_COMPLETION_REPORT.md),
+[PreProd readiness](docs/ONDC_PREPROD_READINESS.md) and
+[deployment](docs/ONDC_DEPLOYMENT.md) for evidence and operating instructions.
+
+### Pending and externally blocked
+
+- Real organization, subscriber, domain, city and merchant-policy details.
+- Public HTTPS/OCSP, approved secret-manager keys, ONDC Portal access and PreProd
+  subscriber-ID whitelisting.
+- Explicitly authorized Registry subscription, signed lookup confirmation, Workbench/log
+  validation and external interoperability evidence.
+- Reverse pickup/QC/liquidation, actual refund and settlement confirmation,
+  exchange/replacement, broader payment/logistics profiles and verified seller-force
+  cancellation governance.
+- Named-user MFA/RBAC, distributed edge rate limiting, centralized monitoring, tested
+  backup/restore and a reviewed multi-instance hosting deployment.
+
+External network communication remains disabled by default. No Registry subscription,
+public deployment, DNS change or certification claim has been made. Category, color and
+size remain free-text internal fields with explicit publication mapping.
+
+Local development uses loopback access. PreProd/production configuration fails closed
+without strong administrative authentication and explicit HTTPS CORS origins. Inventory
+uses absolute quantity replacement for internal administration; ONDC order commitment is
+handled separately with transactional locking.
 Timestamps are UTC-aware on PostgreSQL; updates are maintained by SQLAlchemy.
 No automatic schema creation runs at application startup; use Alembic.
 
 `.env` files and virtual environments are ignored. Only the public API URL belongs
 in `frontend/.env`; all `VITE_` values are public browser configuration. Random local
 database credentials are generated outside source code. The source repository is [tnsurendra/sr-fashions-seller-platform](https://github.com/tnsurendra/sr-fashions-seller-platform).
-No cloud deployment is configured.
+Production-like deployment files are included but no cloud provider or public host is configured.
 
 Implementation references: [FastAPI testing](https://fastapi.tiangolo.com/tutorial/testing/),
 [SQLAlchemy relationships](https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html),

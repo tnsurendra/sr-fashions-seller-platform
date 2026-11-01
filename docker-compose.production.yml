@@ -1,0 +1,71 @@
+name: ondc-fashion-seller-production
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?required}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-ondc_fashion}
+    secrets: [postgres_password]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    networks: [private]
+  migrate:
+    build: ./backend
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    env_file: [backend/.env.production]
+    depends_on:
+      postgres: {condition: service_healthy}
+    networks: [private]
+    restart: "no"
+  api:
+    build: ./backend
+    env_file: [backend/.env.production]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+    restart: unless-stopped
+    networks: [private, edge]
+  callback-worker:
+    build: ./backend
+    command: ["python", "-m", "app.ondc.protocol.maintenance", "--loop"]
+    env_file: [backend/.env.production]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    restart: on-failure
+    networks: [private, edge]
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    networks: [edge]
+  proxy:
+    image: caddy:2.10-alpine
+    ports: ["80:80", "443:443"]
+    environment:
+      PUBLIC_DOMAIN: ${PUBLIC_DOMAIN:?required}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      api: {condition: service_healthy}
+      frontend: {condition: service_started}
+    restart: unless-stopped
+    networks: [edge]
+networks:
+  private: {internal: true}
+  edge: {}
+volumes:
+  postgres_data: {}
+  caddy_data: {}
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt

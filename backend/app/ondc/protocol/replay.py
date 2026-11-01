@@ -19,10 +19,15 @@ def existing(db, context, raw):
         raise ReplayConflict("Message identifier reused with a different body")
     return row
 
-def accept(db, search, raw, callback, settings):
+def accept(db, search, raw, callback, settings, *, callback_headers=None, delivered=False):
+    callback = callback or {}
+    callback_action = callback.get("context", {}).get("action", "on_search")
+    if callback_action not in {"on_search", "on_select", "on_init", "on_confirm", "on_status", "on_cancel", "on_update"}:
+        raise ValueError("Unsupported callback action")
     row = DiscoveryMessage(**replay_key(search.context), body_hash=hashlib.sha512(raw).hexdigest(),
           request=search.to_wire(), callback=callback,
-          destination=search.context.bap_uri.rstrip("/") + "/on_search",
+          callback_headers=callback_headers or {}, status="delivered" if delivered else "pending",
+          destination=search.context.bap_uri.rstrip("/") + "/" + callback_action,
           retain_until=time.time() + settings.replay_retention_seconds)
     db.add(row)
     try:

@@ -94,10 +94,10 @@ def test_variant_update(client, catalog):
     assert client.put(f"/api/products/{product['id']}/variants/{variant['id']}", json=payload).json()["selling_price"] == "899.00"
     assert client.put(f"/api/products/999/variants/{variant['id']}", json=payload).status_code == 404
 
-def test_cors_and_no_protocol_routes(client):
+def test_cors_and_deferred_protocol_routes(client):
     response = client.options("/api/products", headers={"Origin": "http://localhost:5173", "Access-Control-Request-Method": "POST"})
     assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
     response = client.options("/api/products", headers={"Origin": "https://untrusted.example", "Access-Control-Request-Method": "POST"})
     assert response.status_code == 400
-    for path in ["/select", "/init", "/confirm"]:
+    for path in ["/track"]:
         assert client.post(path, json={}).status_code == 404

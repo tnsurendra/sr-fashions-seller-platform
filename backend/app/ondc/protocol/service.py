@@ -8,7 +8,7 @@ from app.ondc.catalog.discovery import build_callback
 from app.ondc.protocol.replay import existing, accept
 from app.ondc.signing.security import authenticate, check_destination
 from app.ondc.validators.discovery import require_fresh_context
-from app.ondc.clients.http import CallbackError
+from app.ondc.clients.http import CallbackError, CallbackRejected
 from app.ondc.signing.crypto import SignatureError, private_key
 from app.ondc.protocol.errors import DiscoveryError
 from app.ondc.schemas.context import Context
@@ -39,12 +39,13 @@ class DiscoveryService:
         if row:
             return row.id
         with db.no_autoflush:
-            callback = build_callback(db, search, self.settings)
+            callback, callback_headers, no_changes = build_callback(db, search, self.settings)
         try:
             require_fresh_context(search.context)
         except ValueError:
             raise DiscoveryError("30022", "Request expired during processing") from None
-        row = accept(db, search, raw, callback, self.settings)
+        row = accept(db, search, raw, callback, self.settings,
+                     callback_headers=callback_headers, delivered=no_changes)
         return row.id
 
     async def dispatch(self, db, identity):
@@ -60,15 +61,37 @@ class DiscoveryService:
         row = db.get(DiscoveryMessage, identity)
         status, failure = "delivered", None
         try:
-            validate_catalog_callback(row.callback)
-            try:
-                require_fresh_context(Context.model_validate(row.callback["context"]))
-            except ValueError:
-                raise DiscoveryError("30022", "Callback expired") from None
+            if row.callback.get("context", {}).get("action") == "on_search":
+                validate_catalog_callback(row.callback)
+            elif row.callback.get("context", {}).get("action") in {"on_status", "on_cancel", "on_update"}:
+                from app.ondc.protocol.post_order import validate_post_order_callback
+                validate_post_order_callback(row.callback)
+            else:
+                from app.ondc.protocol.purchase import validate_purchase_callback
+                validate_purchase_callback(row.callback)
+            callback_context = Context.model_validate(row.callback["context"])
+            if callback_context.ttl is not None:
+                try:
+                    require_fresh_context(callback_context)
+                except ValueError:
+                    raise DiscoveryError("30022", "Callback expired") from None
             await check_destination(row.destination, self.settings)
-            await self.client.post(row.destination, row.callback, compress=True)
+            await self.client.post(row.destination, row.callback, compress=True,
+                                   extra_headers=row.callback_headers)
+            if row.callback.get("context", {}).get("action") == "on_search":
+                from app.ondc.models import CatalogPublicationState
+                db.execute(update(CatalogPublicationState).where(
+                    CatalogPublicationState.state == "pending").values(
+                    state="published", published_at=time.time(), rejection_code=None, rejection_message=None))
         except DiscoveryError:
             status, failure = "expired", "callback_expired"
+        except CallbackRejected as exc:
+            status, failure = "failed", "callback_rejected"
+            if row.callback.get("context", {}).get("action") == "on_search":
+                from app.ondc.models import CatalogPublicationState
+                db.execute(update(CatalogPublicationState).where(
+                    CatalogPublicationState.state.in_(["pending", "published"])).values(
+                    state="rejected", rejection_code=exc.code, rejection_message=exc.safe_message))
         except (CallbackError, SignatureError, ValueError):
             status, failure = "failed", "callback_failed"
             logger.warning("ONDC callback failed; discovery_record=%s", identity)
