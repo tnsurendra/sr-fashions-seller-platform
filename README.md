@@ -67,11 +67,13 @@ and supported return requests without displaying unnecessary customer details. E
 backend admin token only when performing authorized fulfillment or return decisions; it
 is held in browser memory and is not bundled into the frontend.
 
-The screenshot shows the honest empty state because the sample catalog command does not
-fabricate a signed Buyer App transaction. Orders appear only through the authenticated
-ONDC purchase flow.
+For documentation, the separate `seed_demo_order.py` command creates a clearly labeled
+synthetic persistence record with no personal information or external network claim. The
+screenshot expands that record to show the item, full fulfillment history, qualified
+financial audit and approved return. Real orders still appear only through the signed,
+authenticated ONDC purchase flow.
 
-![Orders page showing the empty state before a signed ONDC order is confirmed](docs/screenshots/orders.png)
+![Expanded synthetic order showing item, fulfillment history, financial audit and approved return](docs/screenshots/orders.png)
 
 ### 6. Returns workflow boundary
 
@@ -103,6 +105,11 @@ Registry was contacted while preparing this public repository.
 The authenticated internal metrics endpoint reports HTTP outcomes, callback/Registry
 counters and queue backlog. It is intended for protected operational access, not public
 exposure.
+
+![Swagger UI showing catalog, inventory, ONDC discovery, purchase, post-order and administration endpoints](docs/screenshots/api-docs.png)
+
+For the complete protocol sequence, demonstration commands, evidence matrix and honest
+simulation boundaries, see [End-to-end functionality demonstration](docs/END_TO_END_DEMO.md).
 
 ## Architecture
 
