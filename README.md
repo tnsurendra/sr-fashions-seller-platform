@@ -38,18 +38,56 @@ Product details, variant pricing, and opening-stock form.
 
 ## Architecture
 
-- `backend/app/main.py`: application, CORS, health, safe database error responses.
-- `backend/app/config.py`, `database.py`: environment settings and SQLAlchemy sessions.
-- `backend/app/models/`: Seller, Store, Product, ProductVariant, Inventory.
-- `backend/app/schemas/`: Pydantic v2 inputs and outputs.
-- `backend/app/api/`: internal REST endpoints.
-- `backend/app/services/`: transactional catalog and ownership validation.
-- `backend/app/ondc/{routes,schemas,signing,registry,catalog}/`: isolated local discovery, schemas, signing, lookup and catalog mapping.
-- `backend/alembic/`: explicit, versioned database migrations.
-- `backend/tests/`: isolated SQLite behavior tests with foreign keys enabled.
-- `frontend/src/{api,components,pages,layouts}/`: admin SPA, shared Axios client.
-- `docker-compose.yml`: PostgreSQL 17, loopback port binding, health check, durable volume.
-- `scripts/`: safe environment initialization and live API smoke verification.
+```text
+sr-fashions-seller-platform/
+├── backend/
+│   ├── alembic/                 # Database migrations 0001–0005
+│   ├── app/
+│   │   ├── api/                 # Internal seller, store, product and stock REST API
+│   │   ├── models/              # Core catalog ORM models
+│   │   ├── services/            # Transactional catalog business logic
+│   │   └── ondc/
+│   │       ├── catalog/         # Mapping, publication, lifecycle and sync scheduler
+│   │       ├── clients/         # Signed outbound HTTP transport
+│   │       ├── onboarding/      # Keys, challenge handling, preview and readiness CLI
+│   │       ├── protocol/        # Replay, purchase and post-order domain services
+│   │       ├── registry/        # Signed Registry v2 lookup
+│   │       ├── routes/          # Search, purchase, post-order and onboarding endpoints
+│   │       ├── schemas/         # Strict RET12 request/response models
+│   │       ├── signing/         # Ed25519/BLAKE2b signing and verification
+│   │       └── validators/      # Protocol and catalog validation
+│   ├── tests/                   # Unit, integration, concurrency and mock-Buyer tests
+│   └── Dockerfile               # Production API/worker image
+├── frontend/
+│   ├── src/pages/               # Dashboard, catalog, inventory, orders and ONDC status
+│   ├── Dockerfile               # Production React build and Nginx image
+│   └── nginx.conf               # SPA serving and security headers
+├── deploy/Caddyfile             # HTTPS reverse-proxy routing and response headers
+├── docs/                        # Design, validation, security and completion reports
+├── postman/                     # Local internal-API Postman collection
+├── scripts/                     # Environment initialization, seeding and smoke tests
+├── docker-compose.yml           # Loopback-only local PostgreSQL
+├── docker-compose.production.yml # Provider-neutral production-like stack
+├── SETUP.md                     # Installation, startup and troubleshooting
+└── start.bat                    # One-click Windows development launcher
+```
+
+### Main files added during the ONDC expansion
+
+| Area | Files | Purpose |
+| --- | --- | --- |
+| Orders | `protocol/purchase.py`, `routes/purchase.py`, `schemas/orders.py` | Signed select/init/confirm, quote persistence and atomic stock commitment |
+| Post-order | `protocol/post_order.py`, `routes/post_order.py`, `schemas/post_order.py` | Status, supported cancellation/return flows and idempotent state history |
+| Catalog sync | `catalog/lifecycle.py`, `catalog/scheduler.py` | Publication state, durable subscriptions, leasing, retry and recovery |
+| Database | migrations `0004` and `0005`, `ondc/models.py` | Checkout, order, audit, return, subscription and job persistence |
+| Onboarding | `onboarding/crypto.py`, `service.py`, `cli.py`, `routes/onboarding.py` | X25519/Ed25519 keys, site verification, challenge response and safe preview |
+| Operations | `operations.py`, `admin_security.py` | Correlation IDs, limits, metrics and administrative authorization |
+| Admin UI | `Orders.jsx`, `OndcSettings.jsx` | Order lifecycle/audit display and catalog synchronization visibility |
+| Deployment | backend/frontend Dockerfiles, `deploy/Caddyfile`, production Compose | HTTPS edge, API, frontend, worker and private persistent PostgreSQL |
+| Documentation | `ONDC_*` and `PROMPT_*_COMPLETION_REPORT.md` | Supported scope, evidence, security operations, deployment and remaining blockers |
+
+The generated build output, virtual environments, local `.env` files, private keys,
+database dumps and PostgreSQL data are deliberately excluded from Git.
 
 ## Internal REST API
 
