@@ -8,33 +8,101 @@ A fresh clone needs one-time prerequisite and dependency installation before sta
 See [SETUP.md](SETUP.md) for the steps, or copy the detailed
 [Copilot local setup prompt](docs/COPILOT_LOCAL_SETUP_PROMPT.md) into Copilot Chat in Agent mode.
 
-## App screenshots
+## Practical walkthrough and screenshots
 
-Captured from the running local application. Catalog records and stock counts vary by installation; a fresh database starts empty.
+These screenshots were captured from the running application after loading the reusable
+sample catalog. The example has five products, six SKUs, one store and 85 units on hand.
+The hoodie intentionally has zero stock so the out-of-stock behavior is visible.
 
-### Seller dashboard
+To reproduce the same catalog on a running local installation:
 
-Catalog totals, stock overview, and seller/store setup.
+```powershell
+.\backend\.venv312\Scripts\python.exe .\scripts\seed_catalog.py
+```
 
-![SR Fashions seller dashboard with catalog statistics and workspace setup](docs/screenshots/dashboard.png)
+The seed is idempotent: it preserves existing records and skips sample SKUs that already
+exist. A fresh database remains empty until an operator creates data or runs this command.
 
-### Product catalog
+### 1. Dashboard and seller/store setup
 
-Products with their brands, categories, SKU variants, and INR pricing.
+Open `http://127.0.0.1:5173/`. The summary cards show product count, total stock and
+store count. For a new installation, first create a seller profile with a unique email,
+then create a store linked to that seller. These records become the ownership and stock
+location used when products are created.
 
-![SR Fashions product catalog showing variants and prices](docs/screenshots/products.png)
+![Dashboard showing five products, 85 units, one store and seller/store setup forms](docs/screenshots/dashboard.png)
 
-### Inventory
+### 2. Browse and search the product catalog
 
-Stock by store and variant, including out-of-stock indicators.
+Choose **Products** to see each SKU with product name, brand, internal category, size,
+color, MRP and selling price. Use the search box for a product, brand or SKU. In this
+sample, the shirt has separate M and L variants while the other products have one SKU.
 
-![SR Fashions inventory with store-level stock and availability](docs/screenshots/inventory.png)
+![Product catalog showing the seeded shirts, jeans, kurta, T-shirt and hoodie variants](docs/screenshots/products.png)
 
-### Add a product
+### 3. Add a product with opening stock
 
-Product details, variant pricing, and opening-stock form.
+Choose **Add product** from the dashboard or visit `/products/new`. Select the seller,
+enter the product and variant attributes, select the stock location, and supply the
+initial quantity. **Create product** commits the product, variant and opening inventory
+in one database transaction, so a partial catalog entry is not left behind on failure.
 
-![SR Fashions add-product form for product details, variants, and opening stock](docs/screenshots/add-product.png)
+![Add-product form with product details, SKU pricing and opening-stock sections](docs/screenshots/add-product.png)
+
+### 4. Maintain store-level inventory
+
+Choose **Inventory** to filter by store and edit the quantity for an individual SKU.
+Enter the new absolute quantity and select **Save**. Refresh before editing when another
+operator may also be working. The screenshot demonstrates both in-stock badges and the
+zero-stock hoodie. ONDC order confirmation and supported cancellation use transactional
+stock commitment/restoration rather than this manual form.
+
+![Inventory page showing six SKUs, editable quantities and an out-of-stock hoodie](docs/screenshots/inventory.png)
+
+### 5. Review and operate ONDC orders
+
+Choose **Orders** after a valid signed Buyer App `confirm` flow. Each confirmed order can
+be expanded to inspect items, fulfillment state, append-only history, financial events
+and supported return requests without displaying unnecessary customer details. Enter the
+backend admin token only when performing authorized fulfillment or return decisions; it
+is held in browser memory and is not bundled into the frontend.
+
+The screenshot shows the honest empty state because the sample catalog command does not
+fabricate a signed Buyer App transaction. Orders appear only through the authenticated
+ONDC purchase flow.
+
+![Orders page showing the empty state before a signed ONDC order is confirmed](docs/screenshots/orders.png)
+
+### 6. Returns workflow boundary
+
+The separate **Returns** route currently explains that it is planned. Supported RET12
+return initiation and authenticated approve/reject decisions are implemented inside the
+relevant confirmed order on the Orders page. Reverse pickup, QC, liquidation, replacement
+and actual refund execution remain explicitly unsupported until their governing profiles
+are verified and implemented.
+
+![Returns page documenting that standalone return management is planned](docs/screenshots/returns.png)
+
+### 7. Monitor ONDC catalog synchronization
+
+Choose **ONDC Settings** to inspect durable incremental subscriptions and publication
+jobs. Active or failed work appears here after a valid catalog incremental request and
+the scheduler persists it. The sample screen is empty because no external Buyer App or
+Registry was contacted while preparing this public repository.
+
+![ONDC Settings page showing catalog subscription and publication-job status](docs/screenshots/ondc-settings.png)
+
+### 8. API, health and operational checks
+
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- Database-backed health: `http://127.0.0.1:8000/health`
+- Process liveness: `http://127.0.0.1:8000/livez`
+- Deployment readiness: `http://127.0.0.1:8000/readyz`
+- Live CRUD smoke: `.\backend\.venv312\Scripts\python.exe .\scripts\smoke.py`
+
+The authenticated internal metrics endpoint reports HTTP outcomes, callback/Registry
+counters and queue backlog. It is intended for protected operational access, not public
+exposure.
 
 ## Architecture
 
